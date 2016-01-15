@@ -20,7 +20,7 @@ int main(void) {
 
 
 	//Otworz lacze serwera w trybie do zapisu
-	int fdServer = open("/tmp/demo6_fifo", O_WRONLY);
+	int fdServer = open("/tmp/serwerFifo", O_WRONLY);
 	if (fdServer ==  -1) {
 		perror("FIFO opening error");
 		exit(1);
@@ -29,16 +29,13 @@ int main(void) {
 
 	//Poslij komende na lacze serwera
 
-	//Z jakiegos powodu musze zmniejszac L o 1, nie wiem dlaczego....
 	char L = (char)(strlen(komenda)-1);
+
 	write(fdServer, &L, 1); //Wyslij rozmiar stringa
 	write(fdServer, komenda, strlen(komenda) ); 	//A pozniej wyslij stringa
 
 
-	char LId = (char)(strlen(clientFifo)-1);
-	write(fdServer, &LId, 1); //Wyslij rozmiar stringa
-	write(fdServer, clientFifo, strlen(clientFifo) ); 	//A pozniej wyslij stringa
-	//
+	write(fdServer, clientFifo, strlen(clientFifo) ); 	//Wyslij nazwe kolejki klienta
 
 
 	//Zamknij polaczenie z laczem serwera
@@ -49,7 +46,7 @@ int main(void) {
 	int status = mkfifo(clientFifo, 0666);
 	if (status == -1) {
 		perror("FIFO creating error");
-    exit(1);
+    		exit(1);
 	}
 	puts("Utworzono fifo");
 
@@ -61,9 +58,6 @@ int main(void) {
 		exit(1);
 	}
 	puts("Otwarto lacze klienta...\n");
-
-
-	// close(fdClient[1]);
 
 
 	//Wczytaj odpowiedz z lacza

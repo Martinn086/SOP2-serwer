@@ -11,7 +11,7 @@
 int main(void) {
 	puts("Serwer uruchomiony...");
 
-  char * fifo = "/tmp/demo6_fifo";
+  char * fifo = "/tmp/serwerFifo";
 
 
 	//Tworzenie lacza serera
@@ -43,39 +43,31 @@ int main(void) {
 		exit(1);
 	}
 	read(fdServer, stringBuffer, Len);					//Przeczytaj string z lacza
-	printf("\nSerwer otrzymal komende: %s\n\n", stringBuffer);
 
 
 	//Wczytaj nazwe FIFO klienta z lacza
 	char clientFifo[256];			//Bufor przechowujacy nazwe FIFO z lacza
 	memset(clientFifo, 0, 256);   //Wypelnij bufor zerami, zeby wykryc koniec stringa
 	int resId; //Status odpowiedzi
-	char LenId; //Dlugosc odpowiedz
 
-	resId = read(fdServer, &LenId, 1);
-	if (resId == 0) {
-		//Jezeli dlugosc kolejki jest rowna zero, opusc program
-		exit(1);
-	}
-	printf("Hej, tyle odstalem... %d\n", LenId);
-	read(fdServer, clientFifo, LenId+7);					//Przeczytaj string z lacza
-	printf("\nSerwer otrzymal status kolejki: %s\n\n", clientFifo);
-	//TODO przekazywanie id FIFO klienta nie działa
-
-
+	int LenId = 17;
+	read(fdServer, clientFifo, LenId);	//Przeczytaj string z lacza
 
 	sleep(1); //Daj czas klientowi na utworzenie prywatnego lacza
-
+	
+	char formatedClientFifo[LenId];
+	for ( int py=1; py < LenId+1 ; py++ ){
+		formatedClientFifo[py-1] = clientFifo[py];
+	}
+	formatedClientFifo[LenId] = '\0';
 
 	//Otworz lacze klienta w trybie do zapisu
-	int fdClient = open("/tmp/client_fifo", O_WRONLY);
+	int fdClient = open(formatedClientFifo, O_WRONLY);
 	if (fdClient ==  -1) {
 		perror("FIFO opening error");
 		exit(1);
 	}
 
-
-	// close(fdClient[0]);
 	dup2(fdClient,1);
 
 
